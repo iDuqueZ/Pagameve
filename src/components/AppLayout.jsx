@@ -9,7 +9,9 @@ import {
   Bell, 
   Plus, 
   LogOut,
-  Wallet
+  Wallet,
+  Menu,
+  X
 } from 'lucide-react'
 
 const navItems = [
@@ -24,6 +26,15 @@ export default function AppLayout({ children, title, showNewDebt, onNewDebt }) {
   const location = useLocation()
   const navigate = useNavigate()
   const [unreadCount, setUnreadCount] = useState(0)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   useEffect(() => {
     if (!user) return
@@ -57,28 +68,56 @@ export default function AppLayout({ children, title, showNewDebt, onNewDebt }) {
     }
   }, [user])
 
+  useEffect(() => {
+    if (isMobile) setSidebarOpen(false)
+  }, [location.pathname, isMobile])
+
   async function handleSignOut() {
     await signOut()
     navigate('/auth')
   }
 
   return (
-    <div className="app-shell" style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
+      {/* Mobile Overlay */}
+      {isMobile && sidebarOpen && (
+        <div 
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 40,
+          }}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="sidebar" style={{
+      <aside style={{
+        position: 'fixed',
+        left: 0,
+        top: 0,
+        bottom: 0,
         width: 'var(--sidebar-width)',
-        minWidth: 'var(--sidebar-width)',
         background: 'var(--bg-surface)',
         borderRight: '1px solid var(--border)',
         display: 'flex',
-        flexDirection: 'column'
+        flexDirection: 'column',
+        zIndex: 50,
+        transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+        transition: 'transform 0.2s ease',
       }}>
         {/* Logo */}
-        <div style={{ padding: '0 20px', borderBottom: '1px solid var(--border)', height: 'var(--topbar-height)', display: 'flex', alignItems: 'center' }}>
+        <div style={{ padding: '0 20px', borderBottom: '1px solid var(--border)', height: 'var(--topbar-height)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none' }}>
             <Wallet size={20} strokeWidth={1.8} color="var(--accent)" />
             <span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--txt-primary)' }}>PágameVe</span>
           </Link>
+          {isMobile && (
+            <button onClick={() => setSidebarOpen(false)} style={{ background: 'none', border: 'none', color: 'var(--txt-secondary)', cursor: 'pointer' }}>
+              <X size={20} />
+            </button>
+          )}
         </div>
 
         {/* Nav */}
@@ -91,7 +130,7 @@ export default function AppLayout({ children, title, showNewDebt, onNewDebt }) {
               <Link
                 key={item.path}
                 to={item.path}
-                className="nav-item"
+                onClick={() => isMobile && setSidebarOpen(false)}
                 style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -102,7 +141,6 @@ export default function AppLayout({ children, title, showNewDebt, onNewDebt }) {
                   fontSize: '12.5px',
                   cursor: 'pointer',
                   position: 'relative',
-                  transition: 'background 0.15s, color 0.15s',
                   textDecoration: 'none',
                   background: isActive ? 'var(--accent-bg)' : 'transparent',
                 }}
@@ -167,7 +205,15 @@ export default function AppLayout({ children, title, showNewDebt, onNewDebt }) {
       </aside>
 
       {/* Content Area */}
-      <div className="content-area" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div style={{ 
+        flex: 1, 
+        display: 'flex', 
+        flexDirection: 'column', 
+        overflow: 'hidden',
+        marginLeft: isMobile ? 0 : 'var(--sidebar-width)',
+        transition: 'margin-left 0.2s ease',
+        width: isMobile ? '100%' : `calc(100% - var(--sidebar-width))`,
+      }}>
         {/* Topbar */}
         <header style={{
           height: 'var(--topbar-height)',
@@ -175,15 +221,19 @@ export default function AppLayout({ children, title, showNewDebt, onNewDebt }) {
           borderBottom: '1px solid var(--border)',
           display: 'flex',
           alignItems: 'center',
-          padding: '0 20px',
+          padding: '0 16px',
           gap: '12px',
           flexShrink: 0
         }}>
+          {isMobile && (
+            <button onClick={() => setSidebarOpen(true)} style={{ background: 'none', border: 'none', color: 'var(--txt-secondary)', cursor: 'pointer', marginRight: '4px' }}>
+              <Menu size={20} />
+            </button>
+          )}
           <h1 style={{ fontSize: '14px', fontWeight: '500', color: 'var(--txt-primary)', margin: 0 }}>{title}</h1>
           {showNewDebt && (
             <button
               onClick={onNewDebt}
-              className="btn-primary"
               style={{
                 marginLeft: 'auto',
                 padding: '6px 13px',
@@ -199,13 +249,13 @@ export default function AppLayout({ children, title, showNewDebt, onNewDebt }) {
               }}
             >
               <Plus size={12} strokeWidth={2} />
-              Nueva deuda
+              {!isMobile && 'Nueva deuda'}
             </button>
           )}
         </header>
 
         {/* Main Content */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+        <main style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
           {children}
         </main>
       </div>

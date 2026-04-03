@@ -3,7 +3,6 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import Input from './ui/Input'
 import Button from './ui/Button'
-import { formatCOP } from '../utils/format'
 import { Search } from 'lucide-react'
 
 export default function DebtForm({ onSuccess, onCancel }) {
@@ -102,7 +101,7 @@ export default function DebtForm({ onSuccess, onCancel }) {
 
       <div>
         <label style={{ fontSize: '11px', color: 'var(--txt-secondary)', display: 'block', marginBottom: '5px' }}>Usuario deudor</label>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <input
             type="text"
             value={debtorUsername}
@@ -112,7 +111,8 @@ export default function DebtForm({ onSuccess, onCancel }) {
             }}
             placeholder="Buscar por username"
             style={{
-              flex: 1,
+              flex: '1 1 auto',
+              minWidth: '150px',
               background: 'var(--bg-card)',
               border: '1px solid var(--border)',
               borderRadius: 'var(--radius-sm)',
@@ -190,8 +190,8 @@ export default function DebtForm({ onSuccess, onCancel }) {
         onChange={(e) => setDueDate(e.target.value)}
       />
 
-      <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
-        <Button type="submit" variant="primary" disabled={loading || !userFound} style={{ flex: 1, justifyContent: 'center' }}>
+      <div style={{ display: 'flex', gap: '8px', marginTop: '8px', flexWrap: 'wrap' }}>
+        <Button type="submit" variant="primary" disabled={loading || !userFound} style={{ flex: '1 1 auto', justifyContent: 'center', minWidth: '140px' }}>
           {loading ? 'Creando...' : 'Crear Deuda'}
         </Button>
         {onCancel && (

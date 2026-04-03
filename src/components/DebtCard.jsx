@@ -30,30 +30,30 @@ export default function DebtCard({ debt, role, onAccept, onReject, onPay, onForg
         transition: 'border-color 0.15s',
         borderLeft: requiresAction ? '2px solid var(--accent)' : undefined,
       }}>
-        {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+        {/* Header - responsive flex */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px', gap: '12px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', minWidth: 0 }}>
             <DebtAvatar name={user?.username} role={role} />
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ fontSize: '12.5px', fontWeight: '500', color: 'var(--txt-primary)' }}>
+            <div style={{ minWidth: 0 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '12.5px', fontWeight: '500', color: 'var(--txt-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {user?.username || 'Usuario'}
                 </span>
                 <Chip status={debt.status} />
               </div>
-              <span style={{ fontSize: '11px', color: 'var(--txt-muted)' }}>
+              <span style={{ fontSize: '11px', color: 'var(--txt-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', display: 'block' }}>
                 {user?.full_name}
               </span>
             </div>
           </div>
-          <div style={{ fontSize: '11px', color: 'var(--txt-muted)' }}>
+          <div style={{ fontSize: '11px', color: 'var(--txt-muted)', whiteSpace: 'nowrap' }}>
             {new Date(debt.created_at).toLocaleDateString()}
           </div>
         </div>
 
         {/* Description & Amount */}
         <div style={{ marginBottom: '12px' }}>
-          <p style={{ fontSize: '12.5px', color: 'var(--txt-secondary)', marginBottom: '6px' }}>{debt.description}</p>
+          <p style={{ fontSize: '12.5px', color: 'var(--txt-secondary)', marginBottom: '6px', wordBreak: 'break-word' }}>{debt.description}</p>
           <div style={{ fontSize: '18px', fontWeight: '500', color: amountColor }}>
             {formatCOP(debt.amount)}
           </div>
@@ -67,7 +67,7 @@ export default function DebtCard({ debt, role, onAccept, onReject, onPay, onForg
         {/* Progress Bar */}
         {debt.status === 'active' && totalPaid > 0 && (
           <div style={{ marginBottom: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--txt-muted)', marginBottom: '4px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--txt-muted)', marginBottom: '4px', flexWrap: 'wrap', gap: '4px' }}>
               <span>Abonado: {formatCOP(totalPaid)}</span>
               <span>Restante: {formatCOP(remaining)}</span>
             </div>

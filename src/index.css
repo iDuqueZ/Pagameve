@@ -70,3 +70,15 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--txt-muted);
 }
+
+/* Responsive */
+@media (max-width: 768px) {
+  :root {
+    --sidebar-width: 0px;
+  }
+  
+  main {
+    padding: 12px !important;
+  }
+}
+
