@@ -4,6 +4,7 @@ import Auth from './pages/Auth'
 import Dashboard from './pages/Dashboard'
 import TheyOweMe from './pages/TheyOweMe'
 import IOwe from './pages/IOwe'
+import Debtors from './pages/Debtors'
 import Notifications from './pages/Notifications'
 import AppLayout from './components/AppLayout'
 
@@ -57,6 +58,7 @@ function AppRoutes() {
       case '/': return 'Dashboard'
       case '/they-owe-me': return 'Me deben'
       case '/i-owe': return 'Debo'
+      case '/debtors': return 'Deudores'
       case '/notifications': return 'Notificaciones'
       default: return 'PágameVe'
     }
@@ -93,6 +95,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute title="Debo">
             <IOwe />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/debtors"
+        element={
+          <ProtectedRoute title="Deudores">
+            <Debtors />
           </ProtectedRoute>
         }
       />

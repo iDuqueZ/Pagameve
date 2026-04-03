@@ -11,13 +11,15 @@ import {
   LogOut,
   Wallet,
   Menu,
-  X
+  X,
+  Users
 } from 'lucide-react'
 
 const NAV_ITEMS = [
   { path: '/',               label: 'Dashboard',       icon: LayoutDashboard },
   { path: '/they-owe-me',    label: 'Me deben',        icon: UserCheck },
   { path: '/i-owe',          label: 'Debo',            icon: UserX },
+  { path: '/debtors',       label: 'Deudores',        icon: Users },
   { path: '/notifications',  label: 'Notificaciones',  icon: Bell },
 ]
 
