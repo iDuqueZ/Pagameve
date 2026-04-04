@@ -41,7 +41,7 @@ export default function Button({ children, variant = 'primary', className = '', 
         padding: '5px 10px',
         borderRadius: 'var(--radius-sm)',
         fontSize: '11px',
-        cursor: 'pointer',
+        cursor: props.disabled ? 'not-allowed' : 'pointer',
         border: `1px solid ${v.border}`,
         background: v.background,
         color: v.color,
@@ -49,11 +49,12 @@ export default function Button({ children, variant = 'primary', className = '', 
         display: 'inline-flex',
         alignItems: 'center',
         gap: '5px',
+        opacity: props.disabled ? 0.5 : 1,
         ...props.style,
       }}
       className={className}
-      onMouseEnter={(e) => { e.currentTarget.style.background = v.hoverBg }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = v.background }}
+      onMouseEnter={(e) => { if (!props.disabled) e.currentTarget.style.background = v.hoverBg }}
+      onMouseLeave={(e) => { if (!props.disabled) e.currentTarget.style.background = v.background }}
     >
       {children}
     </button>

@@ -82,3 +82,13 @@ body {
   }
 }
 
+@keyframes pulse-border {
+  0% { border-color: var(--border); }
+  50% { border-color: var(--accent); }
+  100% { border-color: var(--border); }
+}
+
+.pulse-border {
+  animation: pulse-border 1s infinite;
+}
+

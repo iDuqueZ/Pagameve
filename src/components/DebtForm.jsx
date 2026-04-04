@@ -126,6 +126,7 @@ export default function DebtForm({ onSuccess, onCancel }) {
             type="button"
             onClick={searchUser}
             disabled={searchingUser || !debtorUsername.trim()}
+            className={userFound === null ? 'pulse-border' : ''}
             style={{
               padding: '8px 12px',
               background: 'var(--bg-elevated)',
