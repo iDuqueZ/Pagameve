@@ -212,7 +212,7 @@ export default function AppLayout({ children, title, showNewDebt, onNewDebt }) {
         </nav>
 
         {/* Avatar + logout */}
-        <div style={{ padding: '12px 8px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
+        <div style={{ padding: '12px 8px', borderTop: '1px solid var(--border)', flexShrink: 0,  display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '7px 8px', textDecoration: 'none' }}>
             <div style={{
               width: '28px', height: '28px', borderRadius: '50%',

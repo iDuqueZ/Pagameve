@@ -1,9 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import Input from './ui/Input'
 import Button from './ui/Button'
-import { Search } from 'lucide-react'
+import { Search, X } from 'lucide-react'
 
 export default function DebtForm({ onSuccess, onCancel }) {
   const { user, profile } = useAuth()
@@ -13,31 +13,55 @@ export default function DebtForm({ onSuccess, onCancel }) {
   const [dueDate, setDueDate] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [searchingUser, setSearchingUser] = useState(false)
+  const [searchResults, setSearchResults] = useState([])
+  const [showResults, setShowResults] = useState(false)
   const [userFound, setUserFound] = useState(null)
+  const searchTimeoutRef = useRef(null)
+  const inputRef = useRef(null)
 
-  async function searchUser() {
-    if (!debtorUsername.trim()) return
-    
-    setSearchingUser(true)
-    setError('')
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, username, full_name')
-      .eq('username', debtorUsername)
-      .single()
-
-    if (error || !data) {
-      setError('Usuario no encontrado')
-      setUserFound(null)
-    } else if (data.id === user.id) {
-      setError('No puedes crearte una deuda a ti mismo')
-      setUserFound(null)
-    } else {
-      setUserFound(data)
+  useEffect(() => {
+    if (debtorUsername.trim().length < 2 || userFound) {
+      setSearchResults([])
+      return
     }
-    setSearchingUser(false)
+
+    clearTimeout(searchTimeoutRef.current)
+    searchTimeoutRef.current = setTimeout(async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, username, full_name')
+        .ilike('username', `%${debtorUsername.trim()}%`)
+        .neq('id', user.id)
+        .limit(5)
+
+      setSearchResults(data || [])
+      setShowResults(true)
+    }, 300)
+
+    return () => clearTimeout(searchTimeoutRef.current)
+  }, [debtorUsername, user.id, userFound])
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (inputRef.current && !inputRef.current.contains(e.target)) {
+        setShowResults(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  function selectUser(result) {
+    setUserFound(result)
+    setDebtorUsername(result.username)
+    setSearchResults([])
+    setShowResults(false)
+  }
+
+  function clearSelection() {
+    setUserFound(null)
+    setDebtorUsername('')
+    setSearchResults([])
   }
 
   async function handleSubmit(e) {
@@ -101,54 +125,83 @@ export default function DebtForm({ onSuccess, onCancel }) {
 
       <div>
         <label style={{ fontSize: '11px', color: 'var(--txt-secondary)', display: 'block', marginBottom: '5px' }}>Usuario deudor</label>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            value={debtorUsername}
-            onChange={(e) => {
-              setDebtorUsername(e.target.value)
-              setUserFound(null)
-            }}
-            placeholder="Buscar por username"
-            style={{
-              flex: '1 1 auto',
-              minWidth: '150px',
-              background: 'var(--bg-card)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)',
-              padding: '8px 10px',
-              color: 'var(--txt-primary)',
-              fontSize: '13px',
-              outline: 'none',
-            }}
-          />
-          <button
-            type="button"
-            onClick={searchUser}
-            disabled={searchingUser || !debtorUsername.trim()}
-            className={userFound === null ? 'pulse-border' : ''}
-            style={{
-              padding: '8px 12px',
-              background: 'var(--bg-elevated)',
-              border: '1px solid var(--border)',
-              borderRadius: 'var(--radius-sm)',
-              color: 'var(--txt-secondary)',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              opacity: searchingUser || !debtorUsername.trim() ? 0.5 : 1,
-            }}
-          >
-            <Search size={14} strokeWidth={1.6} />
-          </button>
+        <div ref={inputRef} style={{ position: 'relative' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <input
+              type="text"
+              value={debtorUsername}
+              onChange={(e) => {
+                setDebtorUsername(e.target.value)
+                setUserFound(null)
+              }}
+              onFocus={() => searchResults.length > 0 && setShowResults(true)}
+              placeholder="Buscar por username"
+              style={{
+                flex: '1 1 auto',
+                minWidth: '150px',
+                background: 'var(--bg-card)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '8px 10px',
+                color: 'var(--txt-primary)',
+                fontSize: '13px',
+                outline: 'none',
+              }}
+            />
+          </div>
+          {showResults && searchResults.length > 0 && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0,
+              background: 'var(--bg-surface)', border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)', marginTop: '4px',
+              zIndex: 20, maxHeight: '200px', overflowY: 'auto',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            }}>
+              {searchResults.map((result) => (
+                <div
+                  key={result.id}
+                  onClick={() => selectUser(result)}
+                  style={{
+                    padding: '10px 12px', cursor: 'pointer',
+                    borderBottom: '1px solid var(--border)',
+                    display: 'flex', alignItems: 'center', gap: '8px',
+                  }}
+                >
+                  <div style={{
+                    width: '28px', height: '28px', borderRadius: '50%',
+                    background: 'var(--accent-bg)', color: 'var(--accent-light)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '11px', fontWeight: '500', flexShrink: 0,
+                  }}>
+                    {result.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '13px', color: 'var(--txt-primary)', fontWeight: '500' }}>
+                      {result.username}
+                    </div>
+                    {result.full_name && (
+                      <div style={{ fontSize: '11px', color: 'var(--txt-muted)' }}>
+                        {result.full_name}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
         {userFound && (
-          <div style={{ marginTop: '8px', padding: '8px 12px', background: 'var(--green-bg)', border: '1px solid var(--green)', borderRadius: 'var(--radius-sm)' }}>
-            <span style={{ color: 'var(--green)', fontSize: '12px' }}>✓</span>
-            <span style={{ color: 'var(--green)', fontSize: '12px', marginLeft: '6px' }}>
-              {userFound.username} ({userFound.full_name || 'Sin nombre'})
+          <div style={{ marginTop: '8px', padding: '8px 12px', background: 'var(--green-bg)', border: '1px solid var(--green)', borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <span style={{ color: 'var(--green)', fontSize: '12px' }}>
+              ✓ {userFound.username} ({userFound.full_name || 'Sin nombre'})
             </span>
+            <button
+              type="button"
+              onClick={clearSelection}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--green)', padding: '2px' }}
+            >
+              <X size={14} />
+            </button>
           </div>
         )}
       </div>
