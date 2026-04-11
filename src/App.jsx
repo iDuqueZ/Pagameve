@@ -6,6 +6,7 @@ import TheyOweMe from './pages/TheyOweMe'
 import IOwe from './pages/IOwe'
 import Debtors from './pages/Debtors'
 import Notifications from './pages/Notifications'
+import Profile from './pages/Profile'
 import AppLayout from './components/AppLayout'
 
 function ProtectedRoute({ children, title, showNewDebt, onNewDebt }) {
@@ -60,6 +61,7 @@ function AppRoutes() {
       case '/i-owe': return 'Debo'
       case '/debtors': return 'Deudores'
       case '/notifications': return 'Notificaciones'
+      case '/profile': return 'Perfil'
       default: return 'PágameVe'
     }
   }
@@ -111,6 +113,14 @@ function AppRoutes() {
         element={
           <ProtectedRoute title="Notificaciones">
             <Notifications />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute title="Perfil">
+            <Profile />
           </ProtectedRoute>
         }
       />

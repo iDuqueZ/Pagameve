@@ -213,7 +213,7 @@ export default function AppLayout({ children, title, showNewDebt, onNewDebt }) {
 
         {/* Avatar + logout */}
         <div style={{ padding: '12px 8px', borderTop: '1px solid var(--border)', flexShrink: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '7px 8px' }}>
+          <Link to="/profile" style={{ display: 'flex', alignItems: 'center', gap: '9px', padding: '7px 8px', textDecoration: 'none' }}>
             <div style={{
               width: '28px', height: '28px', borderRadius: '50%',
               background: 'var(--accent-bg)', color: 'var(--accent-light)',
@@ -230,14 +230,14 @@ export default function AppLayout({ children, title, showNewDebt, onNewDebt }) {
                 {profile?.username || user?.email?.split('@')[0]}
               </div>
             </div>
-            <button
-              onClick={handleSignOut}
-              aria-label="Cerrar sesión"
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--txt-muted)', padding: '4px' }}
-            >
-              <LogOut size={15} strokeWidth={1.6} />
-            </button>
-          </div>
+          </Link>
+          <button
+            onClick={handleSignOut}
+            aria-label="Cerrar sesión"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--txt-muted)', padding: '4px', display: 'flex', alignItems: 'center' }}
+          >
+            <LogOut size={15} strokeWidth={1.6} />
+          </button>
         </div>
       </aside>
 
