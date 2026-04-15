@@ -1,3 +1,5 @@
+import { supabase } from '../lib/supabase'
+
 export async function sendNotificationEmail(userId, subject, html) {
   try {
     const { data: profile } = await supabase
