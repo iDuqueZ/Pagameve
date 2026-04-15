@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { sendNotificationEmail } from '../utils/sendEmail'
 
 export function useDebts(type = 'all') {
   const { user } = useAuth()
@@ -56,7 +57,7 @@ export function useDebts(type = 'all') {
 
     const { data: debt } = await supabase
       .from('debts')
-      .select('creditor_id')
+      .select('creditor_id, debtor:profiles!debts_debtor_id_fkey(username, email)')
       .eq('id', debtId)
       .single()
 
@@ -67,6 +68,12 @@ export function useDebts(type = 'all') {
         debt_id: debtId,
         message: 'El deudor ha aceptado la deuda',
       })
+      
+      sendNotificationEmail(
+        debt.creditor_id,
+        'Deuda aceptada - PágameVe',
+        `<p>Hola,</p><p>El deudor ha aceptado la deuda.</p><p>Puedes verlo en <a href="https://pagameve.netlify.app">PágameVe</a></p>`
+      )
     }
 
     fetchDebts()
@@ -93,6 +100,12 @@ export function useDebts(type = 'all') {
         debt_id: debtId,
         message: 'El deudor ha rechazado la deuda',
       })
+      
+      sendNotificationEmail(
+        debt.creditor_id,
+        'Deuda rechazada - PágameVe',
+        `<p>Hola,</p><p>El deudor ha rechazado la deuda.</p><p>Puedes verlo en <a href="https://pagameve.netlify.app">PágameVe</a></p>`
+      )
     }
 
     fetchDebts()
@@ -134,6 +147,12 @@ export function useDebts(type = 'all') {
       })
 
     if (notifError) console.error('Notif error:', notifError)
+    
+    sendNotificationEmail(
+      debt.creditor_id,
+      'Pago registrado - PágameVe',
+      `<p>Hola,</p><p>Se ha registrado un pago de $${amount} para la deuda.</p><p>Puedes verlo en <a href="https://pagameve.netlify.app">PágameVe</a></p>`
+    )
 
     fetchDebts()
   }
@@ -159,6 +178,12 @@ export function useDebts(type = 'all') {
         debt_id: debtId,
         message: 'El acreedor ha perdonado tu deuda',
       })
+      
+      sendNotificationEmail(
+        debt.debtor_id,
+        'Deuda perdonada - PágameVe',
+        `<p>Hola,</p><p>El acreedor ha perdonado tu deuda.</p><p>Puedes verlo en <a href="https://pagameve.netlify.app">PágameVe</a></p>`
+      )
     }
 
     fetchDebts()
