@@ -28,15 +28,18 @@ export default function DebtForm({ onSuccess, onCancel }) {
 
     clearTimeout(searchTimeoutRef.current)
     searchTimeoutRef.current = setTimeout(async () => {
-      const { data } = await supabase
+      const searchTerm = debtorUsername.trim().toLowerCase()
+      const { data, error } = await supabase
         .from('profiles')
         .select('id, username, full_name, email')
-        .ilike('username', `%${debtorUsername.trim()}%`)
+        .or(`username.ilike.*${searchTerm}*,full_name.ilike.*${searchTerm}*`)
         .neq('id', user.id)
         .limit(5)
 
-      setSearchResults(data || [])
-      setShowResults(true)
+      if (!error && data) {
+        setSearchResults(data)
+        setShowResults(true)
+      }
     }, 300)
 
     return () => clearTimeout(searchTimeoutRef.current)

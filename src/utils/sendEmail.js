@@ -2,7 +2,7 @@ export async function sendNotificationEmail(userId, subject, html) {
   try {
     const { data: profile } = await supabase
       .from('profiles')
-      .select('email, username')
+      .select('email')
       .eq('id', userId)
       .single()
 
