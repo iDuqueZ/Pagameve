@@ -23,7 +23,7 @@ exports.handler = async function(event, context) {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'PágameVe <onboarding@resend.dev>',
+        from: 'PágameVe <noreply@pagameve.site>',
         to: [to],
         subject: subject,
         html: html || '',
