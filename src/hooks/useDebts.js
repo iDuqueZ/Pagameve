@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { sendNotificationEmail } from '../utils/sendEmail'
+import { sendNotificationEmail, getDebtAcceptedEmailHtml, getDebtRejectedEmailHtml, getPaymentRegisteredEmailHtml, getDebtForgivenEmailHtml } from '../utils/sendEmail'
 
 export function useDebts(type = 'all') {
   const { user } = useAuth()
@@ -72,7 +72,8 @@ export function useDebts(type = 'all') {
       sendNotificationEmail(
         debt.creditor_id,
         'Deuda aceptada - PágameVe',
-        `<p>Hola,</p><p>El deudor ha aceptado la deuda.</p><p>Puedes verlo en <a href="https://pagameve.netlify.app">PágameVe</a></p>`
+        getDebtAcceptedEmailHtml,
+        'El deudor'
       )
     }
 
@@ -104,7 +105,8 @@ export function useDebts(type = 'all') {
       sendNotificationEmail(
         debt.creditor_id,
         'Deuda rechazada - PágameVe',
-        `<p>Hola,</p><p>El deudor ha rechazado la deuda.</p><p>Puedes verlo en <a href="https://pagameve.netlify.app">PágameVe</a></p>`
+        getDebtRejectedEmailHtml,
+        'El deudor'
       )
     }
 
@@ -114,7 +116,7 @@ export function useDebts(type = 'all') {
   const registerPayment = async (debtId, amount, note = '') => {
     const { data: debt } = await supabase
       .from('debts')
-      .select('*, payments(*)')
+      .select('*, payments(*), debtor:profiles!debts_debtor_id_fkey(username)')
       .eq('id', debtId)
       .single()
 
@@ -122,6 +124,7 @@ export function useDebts(type = 'all') {
 
     const totalPaid = (debt.payments || []).reduce((sum, p) => sum + parseFloat(p.amount), 0)
     const newTotalPaid = totalPaid + parseFloat(amount)
+    const remaining = parseFloat(debt.amount) - newTotalPaid
     const isPaid = newTotalPaid >= parseFloat(debt.amount)
 
     const { error: paymentError } = await supabase
@@ -151,7 +154,10 @@ export function useDebts(type = 'all') {
     sendNotificationEmail(
       debt.creditor_id,
       'Pago registrado - PágameVe',
-      `<p>Hola,</p><p>Se ha registrado un pago de $${amount} para la deuda.</p><p>Puedes verlo en <a href="https://pagameve.netlify.app">PágameVe</a></p>`
+      getPaymentRegisteredEmailHtml,
+      amount,
+      debt.debtor?.username || 'El deudor',
+      remaining
     )
 
     fetchDebts()
@@ -167,7 +173,7 @@ export function useDebts(type = 'all') {
 
     const { data: debt } = await supabase
       .from('debts')
-      .select('debtor_id')
+      .select('debtor_id, creditor:profiles!debts_creditor_id_fkey(username)')
       .eq('id', debtId)
       .single()
 
@@ -182,7 +188,8 @@ export function useDebts(type = 'all') {
       sendNotificationEmail(
         debt.debtor_id,
         'Deuda perdonada - PágameVe',
-        `<p>Hola,</p><p>El acreedor ha perdonado tu deuda.</p><p>Puedes verlo en <a href="https://pagameve.netlify.app">PágameVe</a></p>`
+        getDebtForgivenEmailHtml,
+        debt.creditor?.username || 'El acreedor'
       )
     }
 

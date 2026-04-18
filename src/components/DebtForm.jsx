@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { sendNotificationEmail } from '../utils/sendEmail'
+import { sendNotificationEmail, getNewDebtEmailHtml } from '../utils/sendEmail'
 import Input from './ui/Input'
 import Button from './ui/Button'
 import { Search, X } from 'lucide-react'
@@ -109,11 +109,10 @@ export default function DebtForm({ onSuccess, onCancel }) {
       sendNotificationEmail(
         userFound.id,
         'Nueva deuda creada - PágameVe',
-        `<p>Hola <strong>${userFound.username}</strong>,</p>
-        <p>${profile?.username || user.email} te ha creado una nueva deuda.</p>
-        <p><strong>Monto:</strong> $${parseInt(amount)}</p>
-        ${description ? `<p><strong>Descripción:</strong> ${description}</p>` : ''}
-        <p>Puedes verlo en <a href="https://pagameve.netlify.app">PágameVe</a></p>`
+        getNewDebtEmailHtml,
+        profile?.username || user.email,
+        amount,
+        description
       )
 
       onSuccess?.()
